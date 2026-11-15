@@ -684,7 +684,7 @@ footer {
         <p class="subtitle">
           Download video TikTok dengan mudah.
           Tempel link video, proses, preview,
-          dan simpan langsung ke galeri perangkatmu.
+          dan simpan langsung ke folder Download.
         </p>
       </div>
 
@@ -721,9 +721,9 @@ footer {
     <div class="note">
       <strong>!</strong>
       <span>
-        Tombol simpan akan membuka menu <b>Simpan ke Galeri / Save to Photos</b>.
-        Jika menu tidak muncul, video otomatis diunduh ke folder <b>Download</b> HP
-        (di Android otomatis muncul di Galeri).
+        Video langsung diunduh ke folder <b>Download</b> perangkatmu.
+        Di Android otomatis muncul di Galeri → folder <b>Download</b>.
+        Di iPhone cek aplikasi <b>Files → Downloads</b>.
       </span>
     </div>
 
@@ -923,7 +923,7 @@ function showError(message) {
   $('resultPanel').replaceChildren(box);
 }
 
-/* ================= SIMPAN KE GALERI ================= */
+/* ================= SIMPAN KE FOLDER DOWNLOAD ================= */
 
 // Unduh blob ke folder Download (di Android otomatis terindeks Galeri)
 function triggerDownload(blob, filename) {
@@ -1021,7 +1021,7 @@ function renderMediaCard(media) {
   const foot=document.createElement('div');
   foot.className='media-foot';
   foot.textContent=
-    'SIMPAN LANGSUNG KE GALERI · MP4 · TIKTOK RANSVELT';
+    'UNDUH LANGSUNG KE FOLDER DOWNLOAD · MP4 · TIKTOK RANSVELT';
 
   card.append(head,view,info,actions,foot);
 
@@ -1061,6 +1061,7 @@ function renderMediaCard(media) {
     save.disabled = true;
 
     try {
+
       let blob = cachedBlob;
 
       if (!blob) {
@@ -1068,52 +1069,18 @@ function renderMediaCard(media) {
         blob = await cacheBlob();
       }
 
-      const file = new File([blob], media.filename, { type: 'video/mp4' });
-
-      /* 1) JALUR UTAMA — menu share HP → "Simpan ke Galeri" */
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-
-        save.textContent = 'PILIH "SIMPAN KE GALERI"';
-
-        try {
-          await navigator.share({
-            files: [file],
-            title: media.title,
-            text: 'Video TikTok — ' + media.author
-          });
-
-          save.textContent = '✓ SELESAI';
-          toast('Pilih "Simpan ke Galeri" / "Save to Photos" untuk menyimpan.');
-
-          setTimeout(() => {
-            save.disabled = false;
-            save.textContent = LABEL;
-          }, 2600);
-
-          return;
-
-        } catch (err) {
-          // pengguna menutup menu share → jangan lanjut unduh
-          if (err && err.name === 'AbortError') {
-            save.textContent = LABEL;
-            save.disabled = false;
-            return;
-          }
-          // share gagal (NotAllowedError dsb) → lanjut ke unduhan
-        }
-      }
-
-      /* 2) FALLBACK — unduh ke folder Download (terindeks galeri) */
+      // LANGSUNG UNDUH KE FOLDER DOWNLOAD
       triggerDownload(blob, media.filename);
+
       save.textContent = '✓ TERSIMPAN';
-      toast('Video masuk folder Download. Di HP cek Galeri → Download.');
+      toast('Video tersimpan ke folder Download.');
 
     } catch (error) {
 
-      /* 3) FALLBACK TERAKHIR — buka video, simpan manual */
+      // fallback: buka video, simpan manual
       window.open(media.url, '_blank', 'noopener');
       save.textContent = '↗ BUKA VIDEO';
-      toast('Tekan lama video lalu pilih "Simpan ke Galeri".', true);
+      toast('Unduhan gagal. Tekan lama video → Simpan.', true);
 
     } finally {
 
@@ -1123,6 +1090,7 @@ function renderMediaCard(media) {
       }, 2600);
 
     }
+
   });
 
   // COPY LINK
